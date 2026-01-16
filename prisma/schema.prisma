@@ -1,33 +1,33 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../app/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
 }
 
-/// 求職者ステータス（必要なら増やす）
 enum JobSeekerStatus {
-  NEW        // 新規
-  INTERVIEWED // 面談済
-  PROPOSING  // 提案中
-  OFFERED    // 内定
-  CLOSED     // 終了
+  NEW
+  INTERVIEWED
+  PROPOSING
+  OFFERED
+  CLOSED
 }
 
 model Company {
-  id       Int     @id @default(autoincrement())
-  name     String  @db.VarChar(255)
-  industry String? @db.VarChar(255)
-  contact  String? @db.VarChar(255)
+  id       String  @id @default(cuid())
+  name     String  @db.VarChar(200)  // 1〜200文字
+  industry String  @db.VarChar(100)  // 必須（1〜100文字）
+  contact  String? @db.VarChar(500)  // 0〜500文字（自由記述）
   memo     String? @db.Text
 
   @@map("companies")
 }
 
 model SalesUser {
-  id       Int      @id @default(autoincrement())
+  // ✅ ログインID（1〜50文字、英数字と - _ のみ）を“手入力で”使う想定
+  // cuid() や autoincrement() は使わない
+  id       String   @id @db.VarChar(50)
   name     String   @db.VarChar(255)
   password String   @db.VarChar(255)
   isActive Boolean  @default(true)
@@ -38,19 +38,22 @@ model SalesUser {
 }
 
 model JobSeeker {
-  id              Int             @id @default(autoincrement())
-  salesUserId     Int
-  name            String          @db.VarChar(255)
-  age             Int?
-  email           String?         @db.VarChar(255)
-  phone           String?         @db.VarChar(255)
-  desiredSalary   Int?
-  desiredLocation String?         @db.VarChar(255)
+  id              String          @id @default(cuid())
+  salesUserId     String          @db.VarChar(50)
 
-  /// 画像では varchar だったけど、運用するなら enum 推奨
+  name            String          @db.VarChar(100)  // 1〜100文字（必須）
+  age             Int?                               // 0〜120（アプリ側でバリデーション）
+  email           String          @db.VarChar(255)  // ✅ 必須
+  phone           String          @db.VarChar(20)   // ✅ 必須（数字とハイフン、最大20）
+
+  desiredJobType  String          @db.VarChar(100)  // ✅ 希望職種（必須・1〜100）
+  desiredLocation String          @db.VarChar(100)  // ✅ 希望勤務地（必須・1〜100）
+
+  desiredSalary   Int?
+
   status          JobSeekerStatus @default(NEW)
 
-  memo            String?         @db.Text
+  memo            String?         @db.VarChar(2000) // 0〜2000文字
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
 
@@ -62,13 +65,13 @@ model JobSeeker {
 }
 
 model JobSeekerHistory {
-  id         Int             @id @default(autoincrement())
-  jobSeekerId Int
-  status     JobSeekerStatus
-  memo       String?         @db.Text
-  createdAt  DateTime        @default(now())
+  id          String          @id @default(cuid())
+  jobSeekerId String
+  status      JobSeekerStatus
+  memo        String?         @db.VarChar(2000)
+  createdAt   DateTime        @default(now())
 
-  jobSeeker  JobSeeker       @relation(fields: [jobSeekerId], references: [id])
+  jobSeeker   JobSeeker       @relation(fields: [jobSeekerId], references: [id])
 
   @@index([jobSeekerId, createdAt])
   @@map("job_seeker_histories")
