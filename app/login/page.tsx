@@ -19,7 +19,7 @@ export default function LoginPage() {
 
   // 未認証で保護ページへ行った場合、NextAuthが callbackUrl を付けることが多い
   const callbackUrl = useMemo(() => {
-    return searchParams.get("callbackUrl") ?? "/applicants";
+    return searchParams.get("callbackUrl") ?? "/jobseekers";
   }, [searchParams]);
 
   const [id, setId] = useState("");
@@ -58,8 +58,8 @@ export default function LoginPage() {
         return;
       }
 
-      // res.url が返ることもあるが、固定でOKなら applicants へ
-      router.push(res.url ?? "/applicants");
+      // res.url が返ることもあるが、固定でOKなら jobseekers へ
+      router.push(res.url ?? "/jobseekers");
       router.refresh();
     } finally {
       setPending(false);

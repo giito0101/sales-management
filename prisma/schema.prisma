@@ -65,14 +65,20 @@ model JobSeeker {
 }
 
 model JobSeekerHistory {
-  id          String          @id @default(cuid())
-  jobSeekerId String
-  status      JobSeekerStatus
-  memo        String?         @db.VarChar(2000)
-  createdAt   DateTime        @default(now())
+  id            String          @id @default(cuid())
+  jobSeekerId   String
 
-  jobSeeker   JobSeeker       @relation(fields: [jobSeekerId], references: [id])
+  status        JobSeekerStatus
+  memo          String?         @db.VarChar(2000)
+
+  salesUserId   String          @db.VarChar(50)
+  salesUserName String          @db.VarChar(255)
+
+  createdAt     DateTime        @default(now())
+
+  jobSeeker     JobSeeker       @relation(fields: [jobSeekerId], references: [id])
 
   @@index([jobSeekerId, createdAt])
   @@map("job_seeker_histories")
 }
+

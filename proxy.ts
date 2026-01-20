@@ -13,7 +13,7 @@ export async function proxy(req: NextRequest) {
   }
 
   // ② 保護したいパス
-  const needsAuth = pathname.startsWith("/applicants");
+  const needsAuth = pathname.startsWith("/jobseekers");
   if (!needsAuth) return NextResponse.next();
 
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
@@ -27,5 +27,5 @@ export async function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/applicants/:path*"],
+  matcher: ["/", "/jobseekers/:path*"],
 };
