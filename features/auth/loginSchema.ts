@@ -8,7 +8,7 @@ export const loginSchema = z.object({
     .regex(/^[A-Za-z0-9_-]+$/, "IDは英数字と - _ のみ使えます"),
   password: z
     .string()
-    .min(1, "パスワードは必須です")
+    .min(8, "パスワードは必須です")
     .max(255, "パスワードが長すぎます"),
 });
 

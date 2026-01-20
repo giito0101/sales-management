@@ -4,10 +4,37 @@ import { compare } from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { loginSchema } from "@/features/auth/loginSchema";
 
+type Credentials = { id: string; password: string };
+
+export async function authorizeCredentials(
+  credentials: Credentials | undefined
+) {
+  // credentials欠け
+  if (!credentials?.id || !credentials?.password) return null;
+
+  // Zodで弾く（任意：UI側で既に弾いてても、ここで守ると堅牢）
+  const parsed = loginSchema.safeParse(credentials);
+  if (!parsed.success) return null;
+
+  const user = await prisma.salesUser.findUnique({
+    where: { id: credentials.id },
+    select: { id: true, name: true, password: true, isActive: true },
+  });
+
+  // not found / inactive
+  if (!user || !user.isActive) return null;
+
+  // mismatch
+  const ok = await compare(credentials.password, user.password);
+  if (!ok) return null;
+
+  // ✅ password を返さない
+  return { id: user.id, name: user.name };
+}
+
 export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
   pages: { signIn: "/login" },
-
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -16,44 +43,10 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        const parsed = loginSchema.safeParse({
-          id: credentials?.id,
-          password: credentials?.password,
-        });
-        if (!parsed.success) return null;
-
-        const user = await prisma.salesUser.findUnique({
-          where: { id: parsed.data.id },
-          select: { id: true, name: true, password: true, isActive: true },
-        });
-
-        if (!user || !user.isActive) return null;
-
-        const ok = await compare(parsed.data.password, user.password);
-        if (!ok) return null;
-
-        // NextAuthが要求する形：最低限 id を返す
-        return { id: user.id, name: user.name };
+        // NextAuthはRecord形式で渡してくるので型を寄せる
+        const c = credentials as unknown as Credentials | undefined;
+        return authorizeCredentials(c);
       },
     }),
   ],
-
-  callbacks: {
-    async jwt({ token, user }) {
-      // 初回ログイン時だけ user が来る
-      if (user) {
-        token.userId = user.id;
-        token.name = user.name;
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      if (session.user) {
-        // session.user.id は型拡張して使うのが推奨
-        (session.user as any).id = token.userId;
-        session.user.name = token.name as string | undefined;
-      }
-      return session;
-    },
-  },
 };
