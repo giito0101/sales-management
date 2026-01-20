@@ -9,10 +9,8 @@ type Credentials = { id: string; password: string };
 export async function authorizeCredentials(
   credentials: Credentials | undefined
 ) {
-  // credentials欠け
   if (!credentials?.id || !credentials?.password) return null;
 
-  // Zodで弾く（任意：UI側で既に弾いてても、ここで守ると堅牢）
   const parsed = loginSchema.safeParse(credentials);
   if (!parsed.success) return null;
 
@@ -21,14 +19,12 @@ export async function authorizeCredentials(
     select: { id: true, name: true, password: true, isActive: true },
   });
 
-  // not found / inactive
   if (!user || !user.isActive) return null;
 
-  // mismatch
   const ok = await compare(credentials.password, user.password);
   if (!ok) return null;
 
-  // ✅ password を返さない
+  // ここで返した id/name が callbacks に渡る
   return { id: user.id, name: user.name };
 }
 
@@ -43,10 +39,26 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        // NextAuthはRecord形式で渡してくるので型を寄せる
         const c = credentials as unknown as Credentials | undefined;
         return authorizeCredentials(c);
       },
     }),
   ],
+  callbacks: {
+    async jwt({ token, user }) {
+      // 初回ログイン時だけ user が入る
+      if (user) {
+        token.id = (user as any).id; // module augmentation後は any不要にできる
+        token.name = user.name;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      // session.user を拡張して id を入れる
+      if (session.user) {
+        (session.user as any).id = token.id as string;
+      }
+      return session;
+    },
+  },
 };
