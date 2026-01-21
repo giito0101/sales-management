@@ -15,50 +15,21 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-type JobSeekerRow = {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  status: "NEW" | "INTERVIEWED" | "PROPOSING" | "OFFERED" | "CLOSED";
-  updatedAt: string; // ISO
-  salesUser: { name: string };
-};
-
-function statusLabel(s: JobSeekerRow["status"]) {
-  switch (s) {
-    case "NEW":
-      return "新規";
-    case "INTERVIEWED":
-      return "面談済";
-    case "PROPOSING":
-      return "提案中";
-    case "OFFERED":
-      return "内定";
-    case "CLOSED":
-      return "終了";
-    default:
-      return s;
-  }
-}
-
-function formatDateTime(iso: string) {
-  const d = new Date(iso);
-  // 最小構成：日本語表示
-  return new Intl.DateTimeFormat("ja-JP", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(d);
-}
+import { jobSeekerSearchSchema } from "@/features/jobseekers/searchSchema";
+import {
+  buildJobSeekerListUrl,
+  formatDateTime,
+  getNextSortOrder,
+  statusLabel,
+  type JobSeekerRow,
+  type SortKey,
+  type SortOrder,
+} from "./jobSeekerTableUtils";
 
 export default function JobSeekerTable(props: {
   initialQuery: string;
-  initialSortKey: "updatedAt" | "id" | "name";
-  initialSortOrder: "asc" | "desc";
+  initialSortKey: SortKey;
+  initialSortOrder: SortOrder;
   jobSeekers: JobSeekerRow[];
   errorMessage: string | null;
 }) {
@@ -68,32 +39,26 @@ export default function JobSeekerTable(props: {
   const [q, setQ] = useState(props.initialQuery);
   const [localError, setLocalError] = useState<string | null>(null);
 
-  const currentSortKey =
-    (sp.get("sortKey") as "updatedAt" | "id" | "name") ?? props.initialSortKey;
+  const currentSortKey = (sp.get("sortKey") as SortKey) ?? props.initialSortKey;
   const currentSortOrder =
-    (sp.get("sortOrder") as "asc" | "desc") ?? props.initialSortOrder;
+    (sp.get("sortOrder") as SortOrder) ?? props.initialSortOrder;
 
   const error = localError ?? props.errorMessage;
 
   const buildUrl = (next: {
     q?: string;
-    sortKey?: string;
-    sortOrder?: string;
-  }) => {
-    const params = new URLSearchParams(sp.toString());
-    if (next.q !== undefined) {
-      if (next.q) params.set("q", next.q);
-      else params.delete("q");
-    }
-    if (next.sortKey !== undefined) params.set("sortKey", next.sortKey);
-    if (next.sortOrder !== undefined) params.set("sortOrder", next.sortOrder);
-    return `/jobseekers?${params.toString()}`;
-  };
+    sortKey?: SortKey;
+    sortOrder?: SortOrder;
+  }) => buildJobSeekerListUrl(sp.toString(), next);
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (q.length > 255) {
-      setLocalError("検索ワードが適切ではありません");
+    const validation = jobSeekerSearchSchema.safeParse({ q });
+    if (!validation.success) {
+      const message =
+        validation.error.flatten().fieldErrors.q?.[0] ??
+        "検索ワードが適切ではありません";
+      setLocalError(message);
       return;
     }
     setLocalError(null);
@@ -102,15 +67,12 @@ export default function JobSeekerTable(props: {
     );
   };
 
-  const toggleSort = (key: "updatedAt" | "id" | "name") => {
-    const isSameKey = currentSortKey === key;
-    const nextOrder = isSameKey
-      ? currentSortOrder === "asc"
-        ? "desc"
-        : "asc"
-      : key === "updatedAt"
-      ? "desc"
-      : "asc";
+  const toggleSort = (key: SortKey) => {
+    const nextOrder = getNextSortOrder({
+      currentSortKey,
+      currentSortOrder,
+      nextKey: key,
+    });
     router.push(buildUrl({ sortKey: key, sortOrder: nextOrder }));
   };
 
@@ -127,7 +89,7 @@ export default function JobSeekerTable(props: {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="氏名 / メール / 電話 / 担当者で検索"
-            maxLength={300} // UI上は少し余裕、判定は255
+            maxLength={300} // UI上は少し余裕、判定は schema
           />
           {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
         </div>
