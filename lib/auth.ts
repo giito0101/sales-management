@@ -7,7 +7,7 @@ import { loginSchema } from "@/features/auth/loginSchema";
 type Credentials = { id: string; password: string };
 
 export async function authorizeCredentials(
-  credentials: Credentials | undefined
+  credentials: Credentials | undefined,
 ) {
   if (!credentials?.id || !credentials?.password) return null;
 
@@ -58,6 +58,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         (session.user as any).id = token.id as string;
       }
+
       return session;
     },
   },
