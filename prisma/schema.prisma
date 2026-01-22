@@ -49,8 +49,6 @@ model JobSeeker {
   desiredJobType  String          @db.VarChar(100)  // ✅ 希望職種（必須・1〜100）
   desiredLocation String          @db.VarChar(100)  // ✅ 希望勤務地（必須・1〜100）
 
-  desiredSalary   Int?
-
   status          JobSeekerStatus @default(NEW)
 
   memo            String?         @db.VarChar(2000) // 0〜2000文字

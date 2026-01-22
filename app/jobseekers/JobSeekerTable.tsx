@@ -15,7 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { jobSeekerSearchSchema } from "@/features/jobseekers/searchSchema";
+import { jobSeekerSearchParamsSchema } from "@/features/jobseekers/searchSchema";
 import {
   buildJobSeekerListUrl,
   formatDateTime,
@@ -53,17 +53,18 @@ export default function JobSeekerTable(props: {
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const validation = jobSeekerSearchSchema.safeParse({ q });
+    const validation = jobSeekerSearchParamsSchema.safeParse({ q });
     if (!validation.success) {
       const message =
         validation.error.flatten().fieldErrors.q?.[0] ??
         "検索ワードが適切ではありません";
+      console.log(message);
       setLocalError(message);
       return;
     }
     setLocalError(null);
     router.push(
-      buildUrl({ q, sortKey: currentSortKey, sortOrder: currentSortOrder })
+      buildUrl({ q, sortKey: currentSortKey, sortOrder: currentSortOrder }),
     );
   };
 

@@ -1,17 +1,43 @@
 // app/jobseekers/page.tsx
 import { cookies } from "next/headers";
+import Link from "next/link";
 import { z } from "zod";
 import JobSeekerTable from "./JobSeekerTable";
-
-const searchParamsSchema = z.object({
-  q: z.string().max(255).optional(),
-  sortKey: z.enum(["updatedAt", "id", "name"]).optional(),
-  sortOrder: z.enum(["asc", "desc"]).optional(),
-});
+import { Button } from "@/components/ui/button"; // shadcn Button
+import { jobSeekerSearchParamsSchema } from "@/features/jobseekers/searchSchema";
 
 type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
+
+function PageHeader() {
+  return (
+    <div className="flex items-start justify-between gap-4">
+      <div>
+        <h1 className="text-xl font-bold">求職者一覧</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          求職者を検索・並び替えできます。
+        </p>
+      </div>
+
+      {/* 右上アクション群 */}
+      <div className="flex items-center gap-2">
+        <Button asChild>
+          <Link href="/jobseekers/new">新規作成</Link>
+        </Button>
+
+        {/* ✅ ログアウト（NextAuth標準） */}
+        <form action="/api/auth/signout" method="POST">
+          {/* NextAuthはCSRFを要求する構成もある。
+             その場合は下の「CSRF対応版」を使ってね */}
+          <Button type="submit" variant="outline">
+            ログアウト
+          </Button>
+        </form>
+      </div>
+    </div>
+  );
+}
 
 async function cookiesToHeader() {
   const store = await cookies();
@@ -38,14 +64,13 @@ async function fetchJobSeekers(params: {
     {
       headers: { cookie: cookieHeader },
       cache: "no-store",
-    }
+    },
   );
 
   return res;
 }
 
 export default async function JobSeekersPage({ searchParams }: PageProps) {
-  // ✅ ここがポイント：Promiseをunwrap
   const sp = (searchParams ? await searchParams : {}) as Record<
     string,
     string | string[] | undefined
@@ -57,12 +82,12 @@ export default async function JobSeekersPage({ searchParams }: PageProps) {
     sortOrder: typeof sp.sortOrder === "string" ? sp.sortOrder : undefined,
   };
 
-  const parsed = searchParamsSchema.safeParse(raw);
+  const parsed = jobSeekerSearchParamsSchema.safeParse(raw);
 
   if (!parsed.success) {
     return (
       <div className="p-6 space-y-4">
-        <h1 className="text-xl font-bold">求職者一覧</h1>
+        <PageHeader />
         <JobSeekerTable
           initialQuery={raw.q ?? ""}
           initialSortKey="updatedAt"
@@ -83,7 +108,7 @@ export default async function JobSeekersPage({ searchParams }: PageProps) {
   if (!res.ok) {
     return (
       <div className="p-6 space-y-4">
-        <h1 className="text-xl font-bold">求職者一覧</h1>
+        <PageHeader />
         <JobSeekerTable
           initialQuery={q}
           initialSortKey={sortKey}
@@ -99,7 +124,7 @@ export default async function JobSeekersPage({ searchParams }: PageProps) {
 
   return (
     <div className="p-6 space-y-4">
-      <h1 className="text-xl font-bold">求職者一覧</h1>
+      <PageHeader />
       <JobSeekerTable
         initialQuery={q}
         initialSortKey={sortKey}
