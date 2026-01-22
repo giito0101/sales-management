@@ -8,11 +8,6 @@ type PageProps = {
 };
 
 export default async function JobSeekersNewPage({ searchParams }: PageProps) {
-  const session = await getServerSession(authOptions);
-  const salesUserId = (session as any)?.salesUserId as string | undefined;
-
-  //   if (!salesUserId) redirect("/login");
-
   const sp = await searchParams;
   const created = sp.created === "1";
 
