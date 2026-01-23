@@ -1,10 +1,18 @@
 import JobSeekerCreateForm from "./JobSeekerCreateForm";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 type PageProps = {
   searchParams: Promise<{ created?: string }>;
 };
 
 export default async function JobSeekersNewPage({ searchParams }: PageProps) {
+  const session = await getServerSession(authOptions);
+  const salesUserId = (session as any)?.user.id as string | undefined;
+
+  if (!salesUserId) redirect("/login");
+
   const sp = await searchParams;
   const created = sp.created === "1";
 
