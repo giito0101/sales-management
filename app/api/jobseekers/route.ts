@@ -84,7 +84,7 @@ export async function POST(req: Request) {
   // 認証必須
   const salesUserId = (session as any)?.user.id as string | undefined;
   const salesUserName = (session as any)?.user.name as string | undefined;
-  console.log(session);
+
   if (!salesUserId || !salesUserName) {
     return NextResponse.json(
       { ok: false, message: "Unauthorized" },
