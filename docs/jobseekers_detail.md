@@ -1,8 +1,8 @@
-## 画面名：求職者新規作成
+## 画面名：求職者詳細
 
 ### 目的
 
-営業担当者の求職者を新規作成する。
+営業担当者の求職者情報を確認する
 
 ### 対象スキーマ
 
@@ -12,48 +12,42 @@ JobSeekerHistory
 
 ### 表示項目
 
+#### 求職者詳細
+
 - 氏名
 - 年齢
 - メールアドレス
 - 電話番号
 - 希望職種
 - 希望勤務地
+- 担当者名
+- ステータス（新規/面談済/提案中/内定/終了）
+- 最終更新日
+- メモ
+
+#### 求職者履歴
+
+- 担当者名
+- ステータス（新規/面談済/提案中/内定/終了）
+- 作成日時
 - メモ
 
 ### 機能
 
-- 表示項目で求職者を新規作成
-- ログインしている営業担当者を求職者の担当者としてDBに登録
-- ステータスを新規で作成
-- 最終更新日と作成日も作成
-- バリデーション
+- 編集ボタン
 - 戻るボタン
-- 再送対策
-- セッション
-- 作成成功時、JobSeekerHistory を同一トランザクションで1件追加する
+- 表示項目で求職者詳細と求職者履歴を表示
+- 作成日時でソート
 
 ### 挙動
 
-- 求職者一覧から、求職者新規作成へ遷移
-- 作成ボタンを押した後は、作成されたメッセージを表示し、求職者新規作成へリダイレクト
+- 編集ボタンを押した後、求職者編集に遷移する
 - 戻るボタンで、求職者一覧へ戻る
 
 ### ルーティング
 
-求職者一覧 /jobseekers
-求職者新規作成 /jobseekers/new
-
-### ルール
-
-| 対象（画面）   | エンティティ | 項目名         | 必須 | 入力制約（文字数・形式など）           |
-| -------------- | ------------ | -------------- | ---- | -------------------------------------- |
-| 求職者新規作成 | 求職者       | 氏名           | Yes  | 1〜100文字                             |
-| 求職者新規作成 | 求職者       | 年齢           | No   | 0〜120の整数                           |
-| 求職者新規作成 | 求職者       | メールアドレス | Yes  | メール形式（xxx@yyy.zzz）、最大255文字 |
-| 求職者新規作成 | 求職者       | 電話番号       | Yes  | 数字とハイフンのみ、最大20文字         |
-| 求職者新規作成 | 求職者       | 希望職種       | Yes  | 1〜100文字                             |
-| 求職者新規作成 | 求職者       | 希望勤務地     | Yes  | 1〜100文字                             |
-| 求職者新規作成 | 求職者       | メモ           | No   | 0〜2000文字                            |
+求職者詳細 jobseekers/[jobseekerId]
+求職者編集 /jobseekers/[jobseekerId]/edit
 
 ### スキーマ
 
@@ -117,38 +111,19 @@ model JobSeekerHistory {
 }
 ```
 
-### トランザクション
-
-```mermaid
-sequenceDiagram
-  participant UI as /jobseekers/new (UI)
-  participant API as /api/jobseekers (Route Handler)
-  participant Auth as getServerSession(authOptions)
-  participant DB as Prisma(DB)
-
-  UI->>API: POST form data
-  API->>Auth: getServerSession()
-  Auth-->>API: salesUserId, salesUserName
-  API->>DB: $transaction start
-  API->>DB: create JobSeeker (status=NEW, salesUserId)
-  API->>DB: create JobSeekerHistory (status=NEW, salesUser info)
-  DB-->>API: commit
-  API-->>UI: 201 + success payload
-  UI-->>UI: toast + redirect(/jobseekers/new?created=1)
-```
-
-### API
-
-| 画面名         | ユーザー操作   | 認証 | httpメソッド | url             | 例  |
-| -------------- | -------------- | ---- | ------------ | --------------- | --- |
-| 求職者新規作成 | 新規作成したい | 要   | POST         | /api/jobseekers |
-
 ### セッション
 
 | キー          | 型     | 例          | 用途           | ソース         |
 | ------------- | ------ | ----------- | -------------- | -------------- |
 | salesUserId   | string | "sales-001" | DBの担当者確定 | SalesUser.id   |
 | salesUserName | string | "営業 太郎" | 表示/履歴複製  | SalesUser.name |
+
+### API
+
+| 画面名     | ユーザー操作        | 認証 | httpメソッド | url                          | 例                                               |
+| ---------- | ------------------- | ---- | ------------ | ---------------------------- | ------------------------------------------------ |
+| 求職者詳細 | 1件詳細を取得したい | 要   | GET          | /api/jobseekers/{id}         |                                                  |
+| 求職者履歴 | 履歴を取得したい    | 要   | GET          | /api/jobseekers/{id}/history | /api/jobseekers/{id}/history?sort=createdAt_desc |
 
 ### 前提
 
@@ -159,3 +134,4 @@ tailwind/shadcnを使う
 lib/prisma.ts
 lib/auth.ts
 validation設定例：features/auth/loginSchema.test.ts
+proxy.ts
