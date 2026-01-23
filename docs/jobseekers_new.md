@@ -145,10 +145,10 @@ sequenceDiagram
 
 ### セッション
 
-| キー          | 型     | 例          | 用途           | ソース         |
-| ------------- | ------ | ----------- | -------------- | -------------- |
-| salesUserId   | string | "sales-001" | DBの担当者確定 | SalesUser.id   |
-| salesUserName | string | "営業 太郎" | 表示/履歴複製  | SalesUser.name |
+| キー | 型     | 例          | 用途           | ソース         |
+| ---- | ------ | ----------- | -------------- | -------------- |
+| id   | string | "sales-001" | DBの担当者確定 | SalesUser.id   |
+| name | string | "営業 太郎" | 表示/履歴複製  | SalesUser.name |
 
 ### 前提
 
