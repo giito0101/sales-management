@@ -1,10 +1,12 @@
 // app/jobseekers/page.tsx
 import { cookies } from "next/headers";
 import Link from "next/link";
-import { z } from "zod";
 import JobSeekerTable from "./JobSeekerTable";
 import { Button } from "@/components/ui/button"; // shadcn Button
 import { jobSeekerSearchParamsSchema } from "@/features/jobseekers/searchSchema";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -58,6 +60,7 @@ async function fetchJobSeekers(params: {
   if (params.sortOrder) qs.set("sortOrder", params.sortOrder);
 
   const cookieHeader = await cookiesToHeader();
+  console.log(cookieHeader);
 
   const res = await fetch(
     `${process.env.NEXTAUTH_URL ?? ""}/api/jobseekers?${qs.toString()}`,
@@ -71,6 +74,10 @@ async function fetchJobSeekers(params: {
 }
 
 export default async function JobSeekersPage({ searchParams }: PageProps) {
+  const session = await getServerSession(authOptions);
+  const salesUserId = (session as any)?.user.id as string | undefined;
+
+  if (!salesUserId) redirect("/login");
   const sp = (searchParams ? await searchParams : {}) as Record<
     string,
     string | string[] | undefined
