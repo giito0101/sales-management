@@ -1,4 +1,4 @@
-// app/jobseekers/[jobseekerId]/page.tsx
+// app/jobseekers/[jobSeekerId]/page.tsx
 import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
 import { cookies, headers } from "next/headers";
