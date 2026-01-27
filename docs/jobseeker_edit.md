@@ -124,3 +124,16 @@ sequenceDiagram
     API-->>UI: 200（更新後データ）
   end
 ```
+
+### 前提
+
+Next.js(App Router) + Auth.js v4
+Next APIを使う
+tailwind/shadcnを使う
+最小構成
+lib/prisma.ts
+lib/auth.ts
+validation設定例：features/auth/loginSchema.test.ts
+proxy.ts
+session取得例:const salesUserId = (session as any)?.user.id as string | undefined;
+Vitest - ReacttestingLibraryを使う
