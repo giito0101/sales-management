@@ -55,12 +55,18 @@ async function fetchJobSeekerDetail(jobSeekerId: string) {
   return (await res.json()) as JobSeekerDetailDto;
 }
 
-async function fetchJobSeekerHistory(jobSeekerId: string) {
+type HistorySort = "createdAt_desc" | "createdAt_asc";
+
+function normalizeHistorySort(sort: string | undefined): HistorySort {
+  return sort === "createdAt_asc" ? "createdAt_asc" : "createdAt_desc";
+}
+
+async function fetchJobSeekerHistory(jobSeekerId: string, sort: HistorySort) {
   const baseUrl = await getBaseUrl();
   const cookie = await cookiesToHeader();
 
   const res = await fetch(
-    `${baseUrl}/api/jobseekers/${jobSeekerId}/history?sort=createdAt_desc`,
+    `${baseUrl}/api/jobseekers/${jobSeekerId}/history?sort=${sort}`,
     {
       method: "GET",
       headers: { cookie },
@@ -76,19 +82,28 @@ async function fetchJobSeekerHistory(jobSeekerId: string) {
 
 type PageProps = {
   params: Promise<{ jobSeekerId: string }>;
+  searchParams?: Promise<{ sort?: string }>;
 };
 
-export default async function JobSeekerDetailPage({ params }: PageProps) {
+export default async function JobSeekerDetailPage({
+  params,
+  searchParams,
+}: PageProps) {
   const session = await getServerSession(authOptions);
   const salesUserId = (session as any)?.user.id as string | undefined;
 
   if (!salesUserId) redirect("/login");
 
   const { jobSeekerId } = await params;
+  const query = (await searchParams) ?? {};
+  const sort = normalizeHistorySort(query.sort);
+  const nextSort =
+    sort === "createdAt_asc" ? "createdAt_desc" : "createdAt_asc";
+  const sortIndicator = sort === "createdAt_asc" ? "▲" : "▼";
 
   const [detail, histories] = await Promise.all([
     fetchJobSeekerDetail(jobSeekerId),
-    fetchJobSeekerHistory(jobSeekerId),
+    fetchJobSeekerHistory(jobSeekerId, sort),
   ]);
 
   if (!detail || !histories) notFound();
@@ -178,7 +193,14 @@ export default async function JobSeekerDetailPage({ params }: PageProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-44">作成日時</TableHead>
+                <TableHead className="w-44">
+                  <Link
+                    href={`/jobseekers/${jobSeekerId}?sort=${nextSort}`}
+                    className="font-medium hover:underline"
+                  >
+                    作成日時 {sortIndicator}
+                  </Link>
+                </TableHead>
                 <TableHead className="w-48">担当者名</TableHead>
                 <TableHead className="w-32">ステータス</TableHead>
                 <TableHead>メモ</TableHead>
