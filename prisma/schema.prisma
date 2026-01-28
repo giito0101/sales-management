@@ -6,57 +6,41 @@ datasource db {
   provider = "postgresql"
 }
 
-enum JobSeekerStatus {
-  NEW
-  INTERVIEWED
-  PROPOSING
-  OFFERED
-  CLOSED
-}
-
 model Company {
   id       String  @id @default(cuid())
-  name     String  @db.VarChar(200)  // 1〜200文字
-  industry String  @db.VarChar(100)  // 必須（1〜100文字）
-  contact  String? @db.VarChar(500)  // 0〜500文字（自由記述）
-  memo     String? @db.Text
+  name     String  @db.VarChar(200)
+  industry String  @db.VarChar(100)
+  contact  String? @db.VarChar(500)
+  memo     String?
 
   @@map("companies")
 }
 
 model SalesUser {
-  // ✅ ログインID（1〜50文字、英数字と - _ のみ）を“手入力で”使う想定
-  // cuid() や autoincrement() は使わない
-  id       String   @id @db.VarChar(50)
-  name     String   @db.VarChar(255)
-  password String   @db.VarChar(255)
-  isActive Boolean  @default(true)
-
+  id         String      @id @db.VarChar(50)
+  name       String      @db.VarChar(255)
+  password   String      @db.VarChar(255)
+  isActive   Boolean     @default(true)
   jobSeekers JobSeeker[]
 
   @@map("sales_users")
 }
 
 model JobSeeker {
-  id              String          @id @default(cuid())
-  salesUserId     String          @db.VarChar(50)
-
-  name            String          @db.VarChar(100)  // 1〜100文字（必須）
-  age             Int?                               // 0〜120（アプリ側でバリデーション）
-  email           String          @db.VarChar(255)  // ✅ 必須
-  phone           String          @db.VarChar(20)   // ✅ 必須（数字とハイフン、最大20）
-
-  desiredJobType  String          @db.VarChar(100)  // ✅ 希望職種（必須・1〜100）
-  desiredLocation String          @db.VarChar(100)  // ✅ 希望勤務地（必須・1〜100）
-
-  status          JobSeekerStatus @default(NEW)
-
-  memo            String?         @db.VarChar(2000) // 0〜2000文字
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-
-  salesUser       SalesUser       @relation(fields: [salesUserId], references: [id])
+  id              String             @id @default(cuid())
+  salesUserId     String             @db.VarChar(50)
+  name            String             @db.VarChar(100)
+  age             Int?
+  email           String             @db.VarChar(255)
+  phone           String             @db.VarChar(20)
+  desiredLocation String             @db.VarChar(100)
+  status          JobSeekerStatus    @default(NEW)
+  memo            String?            @db.VarChar(2000)
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  desiredJobType  String             @db.VarChar(100)
   histories       JobSeekerHistory[]
+  salesUser       SalesUser          @relation(fields: [salesUserId], references: [id])
 
   @@index([salesUserId])
   @@map("job_seekers")
@@ -65,18 +49,21 @@ model JobSeeker {
 model JobSeekerHistory {
   id            String          @id @default(cuid())
   jobSeekerId   String
-
   status        JobSeekerStatus
   memo          String?         @db.VarChar(2000)
-
+  createdAt     DateTime        @default(now())
   salesUserId   String          @db.VarChar(50)
   salesUserName String          @db.VarChar(255)
-
-  createdAt     DateTime        @default(now())
-
   jobSeeker     JobSeeker       @relation(fields: [jobSeekerId], references: [id])
 
   @@index([jobSeekerId, createdAt])
   @@map("job_seeker_histories")
 }
 
+enum JobSeekerStatus {
+  NEW
+  INTERVIEWED
+  PROPOSING
+  OFFERED
+  CLOSED
+}
