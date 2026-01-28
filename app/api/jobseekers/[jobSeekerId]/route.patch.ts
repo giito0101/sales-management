@@ -21,8 +21,8 @@ export async function PATCH(
   const parsed = jobSeekerEditSchema.safeParse(json);
   if (!parsed.success) {
     return NextResponse.json(
-      { message: parsed.error.issues[0]?.message ?? "Bad Request" },
-      { status: 400 },
+      { message: "Validation error", issues: parsed.error.issues },
+      { status: 422 },
     );
   }
 
@@ -31,9 +31,6 @@ export async function PATCH(
   });
   if (!current)
     return NextResponse.json({ message: "Not Found" }, { status: 404 });
-  if (current.salesUserId !== loginSalesUserId) {
-    return NextResponse.json({ message: "Forbidden" }, { status: 403 });
-  }
 
   const nextStatus = (parsed.data.status ?? current.status) as Status;
   if (!isAllowedTransition(current.status as Status, nextStatus)) {
@@ -43,7 +40,7 @@ export async function PATCH(
     );
   }
 
-  const nextSalesUserId = current.salesUserId;
+  const nextSalesUserId = parsed.data.salesUserId ?? current.salesUserId;
   const nextMemo = parsed.data.memo ?? null;
 
   const statusChanged = nextStatus !== current.status;
@@ -61,9 +58,10 @@ export async function PATCH(
           phone: parsed.data.phone,
           desiredJobType: parsed.data.desiredJobType,
           desiredLocation: parsed.data.desiredLocation,
-        status: nextStatus,
-        memo: nextMemo,
-      },
+          salesUserId: nextSalesUserId,
+          status: nextStatus,
+          memo: nextMemo,
+        },
       });
 
       if (statusChanged || salesUserChanged || memoChanged) {

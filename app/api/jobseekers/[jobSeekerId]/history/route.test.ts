@@ -9,14 +9,12 @@ vi.mock("next-auth", () => ({
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
-    jobSeeker: { findFirst: vi.fn() },
     jobSeekerHistory: { findMany: vi.fn() },
   },
 }));
 
 import { prisma } from "@/lib/prisma";
 
-const jobSeekerFindFirstMock = vi.mocked(prisma.jobSeeker.findFirst);
 const jobSeekerHistoryFindManyMock = vi.mocked(prisma.jobSeekerHistory.findMany);
 
 function buildRequest(url: string) {
@@ -34,41 +32,22 @@ describe("GET /api/jobseekers/[id]/history", () => {
     const res = await GET(
       buildRequest("http://localhost/api/jobseekers/js-1/history"),
       {
-        params: Promise.resolve({ id: "js-1" }),
+        params: Promise.resolve({ jobSeekerId: "js-1" }),
       },
     );
 
     expect(res.status).toBe(401);
-    expect(jobSeekerFindFirstMock).not.toHaveBeenCalled();
-  });
-
-  it("担当者外の場合は 404 を返す", async () => {
-    getServerSessionMock.mockResolvedValueOnce({
-      user: { id: "sales-001" },
-    });
-    jobSeekerFindFirstMock.mockResolvedValueOnce(null);
-
-    const res = await GET(
-      buildRequest("http://localhost/api/jobseekers/js-1/history"),
-      {
-        params: Promise.resolve({ id: "js-1" }),
-      },
-    );
-
-    expect(res.status).toBe(404);
-    expect(jobSeekerHistoryFindManyMock).not.toHaveBeenCalled();
   });
 
   it("不正な sort クエリは 400 を返す", async () => {
     getServerSessionMock.mockResolvedValueOnce({
       user: { id: "sales-001" },
     });
-    jobSeekerFindFirstMock.mockResolvedValueOnce({ id: "js-1" } as any);
 
     const res = await GET(
       buildRequest("http://localhost/api/jobseekers/js-1/history?sort=invalid"),
       {
-        params: Promise.resolve({ id: "js-1" }),
+        params: Promise.resolve({ jobSeekerId: "js-1" }),
       },
     );
 
@@ -80,13 +59,12 @@ describe("GET /api/jobseekers/[id]/history", () => {
     getServerSessionMock.mockResolvedValueOnce({
       user: { id: "sales-001" },
     });
-    jobSeekerFindFirstMock.mockResolvedValueOnce({ id: "js-1" } as any);
     jobSeekerHistoryFindManyMock.mockResolvedValueOnce([]);
 
     const res = await GET(
       buildRequest("http://localhost/api/jobseekers/js-1/history"),
       {
-        params: Promise.resolve({ id: "js-1" }),
+        params: Promise.resolve({ jobSeekerId: "js-1" }),
       },
     );
 
@@ -109,7 +87,6 @@ describe("GET /api/jobseekers/[id]/history", () => {
     getServerSessionMock.mockResolvedValueOnce({
       user: { id: "sales-001" },
     });
-    jobSeekerFindFirstMock.mockResolvedValueOnce({ id: "js-1" } as any);
     jobSeekerHistoryFindManyMock.mockResolvedValueOnce([
       {
         id: "h-1",
@@ -126,7 +103,7 @@ describe("GET /api/jobseekers/[id]/history", () => {
         "http://localhost/api/jobseekers/js-1/history?sort=createdAt_asc",
       ),
       {
-        params: Promise.resolve({ id: "js-1" }),
+        params: Promise.resolve({ jobSeekerId: "js-1" }),
       },
     );
 

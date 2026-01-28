@@ -82,7 +82,7 @@ async function fetchJobSeekerHistory(jobSeekerId: string, sort: HistorySort) {
 
 type PageProps = {
   params: Promise<{ jobSeekerId: string }>;
-  searchParams?: Promise<{ sort?: string }>;
+  searchParams?: Promise<{ sort?: string; updated?: string }>;
 };
 
 export default async function JobSeekerDetailPage({
@@ -97,6 +97,7 @@ export default async function JobSeekerDetailPage({
   const { jobSeekerId } = await params;
   const query = (await searchParams) ?? {};
   const sort = normalizeHistorySort(query.sort);
+  const updated = query.updated === "1";
   const nextSort =
     sort === "createdAt_asc" ? "createdAt_desc" : "createdAt_asc";
   const sortIndicator = sort === "createdAt_asc" ? "▲" : "▼";
@@ -110,6 +111,9 @@ export default async function JobSeekerDetailPage({
 
   return (
     <div className="mx-auto w-full max-w-4xl p-6 space-y-6">
+      {updated && (
+        <div className="rounded-md border p-3 text-sm">更新しました。</div>
+      )}
       {/* ヘッダー */}
       <div className="flex items-start justify-between gap-4">
         <div>

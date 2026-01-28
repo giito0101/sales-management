@@ -17,7 +17,7 @@ export async function GET(
   const { jobSeekerId } = await params;
 
   const js = await prisma.jobSeeker.findFirst({
-    where: { id: jobSeekerId, salesUserId },
+    where: { id: jobSeekerId },
     select: {
       id: true,
       name: true,
