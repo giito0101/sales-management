@@ -94,19 +94,20 @@ beforeEach(() => {
 });
 
 describe("PATCH /api/jobseekers/[jobSeekerId]", () => {
-  it("更新: 編集不可フィールドは上書きされない", async () => {
+  it("更新: 編集可能フィールドは上書きされる", async () => {
     const req = makeReq({
       ...basePayload(),
-      name: "更新後",
       salesUserId: "sales-999",
+      status: "INTERVIEWED",
+      memo: "更新メモ",
     });
 
     await PATCH(req, { params: { jobSeekerId: "js-1" } } as any);
 
     const call = tx.jobSeeker.update.mock.calls[0]?.[0];
-    console.log("call.data:" + call.data);
     expect(call.data.salesUserId).toBe("sales-999");
-    expect(call.data.name).toBe("更新後");
+    expect(call.data.status).toBe("INTERVIEWED");
+    expect(call.data.memo).toBe("更新メモ");
   });
 
   it("ステータス遷移: 不正遷移は更新されない", async () => {
