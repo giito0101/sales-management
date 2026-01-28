@@ -38,7 +38,7 @@ describe("GET /api/jobseekers/[id]", () => {
     expect(prismaMock.jobSeeker.findFirst).not.toHaveBeenCalled();
   });
 
-  it("担当者の求職者が存在しない場合は 404 を返す", async () => {
+  it("求職者が存在しない場合は 404 を返す", async () => {
     getServerSessionMock.mockResolvedValueOnce({
       user: { id: "sales-001", name: "Sales User" },
     });
@@ -50,7 +50,7 @@ describe("GET /api/jobseekers/[id]", () => {
 
     expect(res.status).toBe(404);
     expect(prismaMock.jobSeeker.findFirst).toHaveBeenCalledWith({
-      where: { id: "js-1", salesUserId: "sales-001" },
+      where: { id: "js-1" },
       select: {
         id: true,
         name: true,
@@ -67,7 +67,7 @@ describe("GET /api/jobseekers/[id]", () => {
     });
   });
 
-  it("担当者の求職者詳細を返す", async () => {
+  it("求職者詳細を返す", async () => {
     getServerSessionMock.mockResolvedValueOnce({
       user: { id: "sales-001", name: "Sales User" },
     });

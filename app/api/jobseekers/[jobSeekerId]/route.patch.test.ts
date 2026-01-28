@@ -105,7 +105,7 @@ describe("PATCH /api/jobseekers/[jobSeekerId]", () => {
 
     const call = tx.jobSeeker.update.mock.calls[0]?.[0];
     console.log("call.data:" + call.data);
-    expect(call.data.salesUserId).toBeUndefined();
+    expect(call.data.salesUserId).toBe("sales-999");
     expect(call.data.name).toBe("更新後");
   });
 
@@ -127,8 +127,7 @@ describe("PATCH /api/jobseekers/[jobSeekerId]", () => {
     expect(tx.jobSeeker.update).not.toHaveBeenCalled();
     expect(tx.jobSeekerHistory.create).not.toHaveBeenCalled();
 
-    // expect(res.status).toBe(400);
-    expect(res).toBeTruthy();
+    expect(res.status).toBe(400);
   });
 
   it("履歴: 変更がない場合は増えない", async () => {
@@ -184,25 +183,20 @@ describe("PATCH /api/jobseekers/[jobSeekerId]", () => {
 
     expect(prismaMock.$transaction).toHaveBeenCalledTimes(1);
 
-    // expect(res.status).toBe(500);
-    expect(res).toBeTruthy();
+    expect(res.status).toBe(500);
   });
 
-  it("認可: 別担当の jobSeekerId を更新しようとしたら拒否", async () => {
-    prismaMock.jobSeeker.findUnique.mockResolvedValueOnce({
-      id: "js-1",
-      salesUserId: "sales-OTHER", // ログイン中の sales-1 と不一致
-      status: "NEW",
-      memo: "メモ",
+  it("バリデーション: 不正な入力は 422 を返す", async () => {
+    const req = makeReq({
+      ...basePayload(),
+      email: "invalid-email",
     });
 
-    const req = makeReq({ ...basePayload(), name: "不正更新" });
     const res = await PATCH(req, { params: { jobSeekerId: "js-1" } } as any);
 
-    expect(tx.jobSeeker.update).not.toHaveBeenCalled();
-    expect(tx.jobSeekerHistory.create).not.toHaveBeenCalled();
-
-    // expect(res.status).toBe(403);
-    expect(res).toBeTruthy();
+    expect(res.status).toBe(422);
+    await expect(res.json()).resolves.toMatchObject({
+      message: "Validation error",
+    });
   });
 });

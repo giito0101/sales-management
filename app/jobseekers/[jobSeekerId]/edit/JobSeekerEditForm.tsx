@@ -3,7 +3,6 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { z } from "zod";
 import {
   jobSeekerEditSchema,
   type JobSeekerEditInput,
@@ -43,7 +42,8 @@ export default function JobSeekerEditForm({
 }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [issues, setIssues] = useState<{ path: (string | number)[]; message: string }[]>([]);
+  const [serverError, setServerError] = useState<string | null>(null);
 
   const [form, setForm] = useState({
     name: initial.name,
@@ -57,8 +57,16 @@ export default function JobSeekerEditForm({
     memo: initial.memo ?? "",
   });
 
-  const parsed = useMemo(() => {
-    // ageは入力欄都合でstringになりがちなのでここで整形
+  const issueMap = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const i of issues) {
+      const key = String(i.path?.[0] ?? "");
+      if (!m.has(key)) m.set(key, i.message);
+    }
+    return m;
+  }, [issues]);
+
+  function buildPayload() {
     const age =
       form.age === null || form.age === ("" as any)
         ? null
@@ -66,23 +74,25 @@ export default function JobSeekerEditForm({
           ? Number(form.age)
           : form.age;
 
-    return jobSeekerEditSchema.safeParse({
+    return {
       ...form,
       age,
       memo: form.memo === "" ? null : form.memo,
       salesUserId: form.salesUserId || undefined,
       status: form.status || undefined,
-    });
-  }, [form]);
+    };
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setErrorMessage(null);
+    setIssues([]);
+    setServerError(null);
 
+    if (isPending) return;
+
+    const parsed = jobSeekerEditSchema.safeParse(buildPayload());
     if (!parsed.success) {
-      const msg =
-        parsed.error.issues[0]?.message ?? "入力内容を確認してください";
-      setErrorMessage(msg);
+      setIssues(parsed.error.issues);
       return;
     }
 
@@ -95,7 +105,13 @@ export default function JobSeekerEditForm({
 
       if (!res.ok) {
         const body = await res.json().catch(() => null);
-        setErrorMessage(body?.message ?? `更新に失敗しました（${res.status}）`);
+        if (res.status === 422 && body?.issues) {
+          setIssues(body.issues);
+          return;
+        }
+        setServerError(
+          body?.message ?? `更新に失敗しました（${res.status}）`,
+        );
         return;
       }
 
@@ -106,8 +122,10 @@ export default function JobSeekerEditForm({
 
   return (
     <form onSubmit={onSubmit} className="space-y-4">
-      {errorMessage && (
-        <div className="rounded-md border p-3 text-sm">{errorMessage}</div>
+      {serverError && (
+        <div className="rounded-md border border-destructive p-3 text-sm text-destructive">
+          {serverError}
+        </div>
       )}
 
       <div className="space-y-2">
@@ -116,6 +134,9 @@ export default function JobSeekerEditForm({
           value={form.name}
           onChange={(e) => setForm({ ...form, name: e.target.value })}
         />
+        {issueMap.get("name") && (
+          <p className="text-sm text-destructive">{issueMap.get("name")}</p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -125,6 +146,9 @@ export default function JobSeekerEditForm({
           value={form.age ?? ""}
           onChange={(e) => setForm({ ...form, age: e.target.value as any })}
         />
+        {issueMap.get("age") && (
+          <p className="text-sm text-destructive">{issueMap.get("age")}</p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -133,6 +157,9 @@ export default function JobSeekerEditForm({
           value={form.email}
           onChange={(e) => setForm({ ...form, email: e.target.value })}
         />
+        {issueMap.get("email") && (
+          <p className="text-sm text-destructive">{issueMap.get("email")}</p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -141,6 +168,9 @@ export default function JobSeekerEditForm({
           value={form.phone}
           onChange={(e) => setForm({ ...form, phone: e.target.value })}
         />
+        {issueMap.get("phone") && (
+          <p className="text-sm text-destructive">{issueMap.get("phone")}</p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -149,6 +179,11 @@ export default function JobSeekerEditForm({
           value={form.desiredJobType}
           onChange={(e) => setForm({ ...form, desiredJobType: e.target.value })}
         />
+        {issueMap.get("desiredJobType") && (
+          <p className="text-sm text-destructive">
+            {issueMap.get("desiredJobType")}
+          </p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -159,6 +194,11 @@ export default function JobSeekerEditForm({
             setForm({ ...form, desiredLocation: e.target.value })
           }
         />
+        {issueMap.get("desiredLocation") && (
+          <p className="text-sm text-destructive">
+            {issueMap.get("desiredLocation")}
+          </p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -178,6 +218,11 @@ export default function JobSeekerEditForm({
             ))}
           </SelectContent>
         </Select>
+        {issueMap.get("salesUserId") && (
+          <p className="text-sm text-destructive">
+            {issueMap.get("salesUserId")}
+          </p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -202,6 +247,9 @@ export default function JobSeekerEditForm({
         <p className="text-xs text-muted-foreground">
           遷移ルール違反は保存時に 400 になります。
         </p>
+        {issueMap.get("status") && (
+          <p className="text-sm text-destructive">{issueMap.get("status")}</p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -211,6 +259,9 @@ export default function JobSeekerEditForm({
           value={form.memo ?? ""}
           onChange={(e) => setForm({ ...form, memo: e.target.value })}
         />
+        {issueMap.get("memo") && (
+          <p className="text-sm text-destructive">{issueMap.get("memo")}</p>
+        )}
       </div>
 
       <div className="flex gap-2">
@@ -222,7 +273,7 @@ export default function JobSeekerEditForm({
         >
           戻る
         </Button>
-        <Button type="submit" disabled={isPending || !parsed.success}>
+        <Button type="submit" disabled={isPending}>
           {isPending ? "保存中…" : "保存"}
         </Button>
       </div>

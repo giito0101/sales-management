@@ -35,23 +35,20 @@ export async function GET(req: Request) {
 
   const { q, sortKey, sortOrder } = parsed.data;
 
-  const where = {
-    salesUserId: session.user.id,
-    ...(q
-      ? {
-          OR: [
-            { name: { contains: q, mode: "insensitive" as const } },
-            { email: { contains: q, mode: "insensitive" as const } },
-            { phone: { contains: q, mode: "insensitive" as const } },
-            {
-              salesUser: {
-                name: { contains: q, mode: "insensitive" as const },
-              },
+  const where = q
+    ? {
+        OR: [
+          { name: { contains: q, mode: "insensitive" as const } },
+          { email: { contains: q, mode: "insensitive" as const } },
+          { phone: { contains: q, mode: "insensitive" as const } },
+          {
+            salesUser: {
+              name: { contains: q, mode: "insensitive" as const },
             },
-          ],
-        }
-      : {}),
-  };
+          },
+        ],
+      }
+    : {};
 
   const orderBy =
     sortKey === "id"

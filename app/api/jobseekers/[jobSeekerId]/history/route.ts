@@ -11,7 +11,7 @@ const historyQuerySchema = z.object({
 
 export async function GET(
   req: Request,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: Promise<{ jobSeekerId: string }> },
 ) {
   const session = await getServerSession(authOptions);
   const salesUserId = (session as any)?.user.id as string | undefined;
@@ -19,16 +19,7 @@ export async function GET(
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  const { id: jobSeekerId } = await params;
-
-  // ✅ 求職者が自分の担当かチェック（履歴だけ直叩きされるのを防ぐ）
-  const owner = await prisma.jobSeeker.findFirst({
-    where: { id: jobSeekerId, salesUserId },
-    select: { id: true },
-  });
-  if (!owner) {
-    return NextResponse.json({ message: "Not Found" }, { status: 404 });
-  }
+  const { jobSeekerId } = await params;
 
   const url = new URL(req.url);
   const parsed = historyQuerySchema.safeParse({

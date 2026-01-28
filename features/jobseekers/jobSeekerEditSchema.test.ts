@@ -28,6 +28,9 @@ describe("jobSeekerEditSchema", () => {
         name: "",
       });
       expect(res.success).toBe(false);
+      if (!res.success) {
+        expect(res.error.issues[0]?.message).toBe("氏名は必須です");
+      }
     });
 
     it("email: 形式不正は落ちる", () => {
@@ -36,6 +39,9 @@ describe("jobSeekerEditSchema", () => {
         email: "xxx",
       });
       expect(res.success).toBe(false);
+      if (!res.success) {
+        expect(res.error.issues[0]?.message).toBe("メール形式が不正です");
+      }
     });
 
     it("phone: 数字/ハイフン以外を含むと落ちる", () => {
@@ -44,6 +50,11 @@ describe("jobSeekerEditSchema", () => {
         phone: "090-ABCD-5678",
       });
       expect(res.success).toBe(false);
+      if (!res.success) {
+        expect(res.error.issues[0]?.message).toBe(
+          "電話番号は数字とハイフンのみです",
+        );
+      }
     });
 
     it("age: 負数は落ちる", () => {
@@ -52,6 +63,9 @@ describe("jobSeekerEditSchema", () => {
         age: -1,
       });
       expect(res.success).toBe(false);
+      if (!res.success) {
+        expect(res.error.issues[0]?.message).toBe("年齢は0〜120です");
+      }
     });
   });
 
@@ -70,6 +84,9 @@ describe("jobSeekerEditSchema", () => {
         memo: "a".repeat(2001),
       });
       expect(res.success).toBe(false);
+      if (!res.success) {
+        expect(res.error.issues[0]?.message).toBe("メモは2000文字以内です");
+      }
     });
   });
 });
