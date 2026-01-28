@@ -42,7 +42,9 @@ export default function JobSeekerEditForm({
 }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [issues, setIssues] = useState<{ path: (string | number)[]; message: string }[]>([]);
+  const [issues, setIssues] = useState<
+    { path: PropertyKey[]; message: string }[]
+  >([]);
   const [serverError, setServerError] = useState<string | null>(null);
 
   const [form, setForm] = useState({
