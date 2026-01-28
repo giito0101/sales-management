@@ -2,100 +2,158 @@
 import { prisma } from "@/lib/prisma";
 import { hash } from "bcryptjs";
 
-async function main() {
-  const passwordHash = await hash("password123", 10);
+type SeedSalesUser = {
+  id: string;
+  name: string;
+  passwordPlain: string;
+  isActive: boolean;
+};
 
-  // --- 営業ユーザー作成 ---
-  const salesUser = await prisma.salesUser.upsert({
-    where: { id: "sales-001" },
-    update: { name: "営業 太郎", password: passwordHash, isActive: true },
-    create: {
-      id: "sales-001",
-      name: "営業 太郎",
-      password: passwordHash,
-      isActive: true,
-    },
-  });
+type SeedJobSeeker = {
+  id: string;
+  salesUserId: string;
+  name: string;
+  email: string;
+  phone: string;
+  status: "NEW" | "INTERVIEWED" | "PROPOSING" | "OFFERED" | "CLOSED";
+  updatedAt: Date;
+  desiredJobType: string; // あなたの型に合わせて enum などに変えてOK
+  desiredLocation: string; // 同上
+};
 
-  console.log("✅ SalesUser seeded:", salesUser.id);
-
-  // --- 既存の求職者を削除（何度seedしても同じ状態になるように） ---
-  await prisma.jobSeeker.deleteMany({
-    where: { salesUserId: salesUser.id },
-  });
-
-  // --- ダミー求職者データ ---
-  const now = Date.now();
-
-  const jobSeekers = [
+function buildJobSeekers(
+  salesUserId: string,
+  suffix: string,
+  now: number,
+): SeedJobSeeker[] {
+  const base: Omit<SeedJobSeeker, "salesUserId">[] = [
     {
-      id: "js-001",
-      name: "山田 一郎",
-      email: "yamada@example.com",
+      id: `js-${suffix}-001`,
+      name: `山田 一郎(${suffix})`,
+      email: `yamada_${suffix}@example.com`,
       phone: "090-1111-1111",
-      status: "NEW" as const,
-      updatedAt: new Date(now - 1000 * 60 * 60 * 24 * 1), // 1日前
+      status: "NEW",
+      updatedAt: new Date(now - 1000 * 60 * 60 * 24 * 1),
+      desiredJobType: "フロントエンド",
+      desiredLocation: "東京都",
     },
     {
-      id: "js-002",
-      name: "佐藤 花子",
-      email: "sato@example.com",
+      id: `js-${suffix}-002`,
+      name: `佐藤 花子(${suffix})`,
+      email: `sato_${suffix}@example.com`,
       phone: "090-2222-2222",
-      status: "INTERVIEWED" as const,
+      status: "INTERVIEWED",
       updatedAt: new Date(now - 1000 * 60 * 60 * 24 * 3),
+      desiredJobType: "バックエンド",
+      desiredLocation: "神奈川県",
     },
     {
-      id: "js-003",
-      name: "鈴木 次郎",
-      email: "suzuki@example.com",
+      id: `js-${suffix}-003`,
+      name: `鈴木 次郎(${suffix})`,
+      email: `suzuki_${suffix}@example.com`,
       phone: "090-3333-3333",
-      status: "PROPOSING" as const,
+      status: "PROPOSING",
       updatedAt: new Date(now - 1000 * 60 * 60 * 24 * 2),
-    },
-    {
-      id: "js-004",
-      name: "高橋 三郎",
-      email: "takahashi@example.com",
-      phone: "090-4444-4444",
-      status: "OFFERED" as const,
-      updatedAt: new Date(now - 1000 * 60 * 60 * 24 * 5),
-    },
-    {
-      id: "js-005",
-      name: "田中 四郎",
-      email: "tanaka@example.com",
-      phone: "090-5555-5555",
-      status: "CLOSED" as const,
-      updatedAt: new Date(now - 1000 * 60 * 60 * 24 * 10),
+      desiredJobType: "フルスタック",
+      desiredLocation: "千葉県",
     },
   ];
 
-  // --- 作成 ---
-  await prisma.jobSeeker.createMany({
-    data: jobSeekers.map((js) => ({
-      salesUserId: salesUser.id,
-      id: js.id,
-      name: js.name,
-      email: js.email,
-      phone: js.phone,
-      status: js.status,
+  return base.map((js) => ({ ...js, salesUserId })); // ← salesUserId を必ず付与
+}
 
-      // ✅ 追加（必須）
-      desiredJobType: "フロントエンド", // 例：あなたのenum/文字列に合わせる
-      desiredLocation: "東京都", // 例：あなたの型に合わせる
+async function main() {
+  const now = Date.now();
 
-      // updatedAt が手動で入れられる設計なら残す
-      updatedAt: js.updatedAt,
-    })),
+  // --- salesUserを複数定義 ---
+  const salesUsers: SeedSalesUser[] = [
+    {
+      id: "sales-001",
+      name: "営業 太郎",
+      passwordPlain: "password123",
+      isActive: true,
+    },
+    {
+      id: "sales-002",
+      name: "営業 花子",
+      passwordPlain: "password123",
+      isActive: true,
+    },
+    {
+      id: "sales-003",
+      name: "営業 次郎",
+      passwordPlain: "password123",
+      isActive: false,
+    },
+    {
+      id: "sales-004",
+      name: "営業 四郎",
+      passwordPlain: "password123",
+      isActive: true,
+    },
+  ];
+
+  const salesUserIds = salesUsers.map((u) => u.id);
+
+  // --- 先に対象営業の配下データを削除（FK回避のため履歴→本体の順） ---
+  await prisma.jobSeekerHistory.deleteMany({
+    where: { jobSeeker: { salesUserId: { in: salesUserIds } } },
+  });
+  await prisma.jobSeeker.deleteMany({
+    where: { salesUserId: { in: salesUserIds } },
   });
 
-  console.log("✅ JobSeekers seeded:", jobSeekers.length);
+  // --- まず salesUser を upsert（passwordはユーザーごとにhash） ---
+  const upsertedSalesUsers = await Promise.all(
+    salesUsers.map(async (u) => {
+      const passwordHash = await hash(u.passwordPlain, 10);
+      const salesUser = await prisma.salesUser.upsert({
+        where: { id: u.id },
+        update: { name: u.name, password: passwordHash, isActive: u.isActive },
+        create: {
+          id: u.id,
+          name: u.name,
+          password: passwordHash,
+          isActive: u.isActive,
+        },
+      });
+      console.log("✅ SalesUser seeded:", salesUser.id);
+      return salesUser;
+    }),
+  );
+
+  // --- salesUserごとに jobSeeker を作る（毎回同じ状態に戻す） ---
+  for (const su of upsertedSalesUsers) {
+    // 既存削除（この営業の配下だけ）
+    await prisma.jobSeekerHistory.deleteMany({
+      where: { jobSeeker: { salesUserId: su.id } },
+    });
+    await prisma.jobSeeker.deleteMany({ where: { salesUserId: su.id } });
+
+    // jobSeeker生成（suffixはsalesUserIdから作って衝突回避）
+    const suffix = su.id.replace("sales-", "s"); // sales-001 -> s001
+    const jobSeekers = buildJobSeekers(su.id, suffix, now);
+
+    await prisma.jobSeeker.createMany({
+      data: jobSeekers.map((js) => ({
+        id: js.id,
+        salesUserId: js.salesUserId,
+        name: js.name,
+        email: js.email,
+        phone: js.phone,
+        status: js.status,
+        desiredJobType: js.desiredJobType,
+        desiredLocation: js.desiredLocation,
+        updatedAt: js.updatedAt, // updatedAtを手動で入れたい場合のみ
+      })),
+    });
+
+    console.log(`✅ JobSeekers seeded for ${su.id}:`, jobSeekers.length);
+  }
 }
 
 main()
-  .then(async () => {
-    await prisma.$disconnect();
-  })
+  .then(async () => prisma.$disconnect())
   .catch(async (e) => {
     console.error(e);
     await prisma.$disconnect();

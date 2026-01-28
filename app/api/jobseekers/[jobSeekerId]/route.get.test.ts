@@ -31,7 +31,7 @@ describe("GET /api/jobseekers/[id]", () => {
     getServerSessionMock.mockResolvedValueOnce(null);
 
     const res = await GET(new Request("http://localhost/api/jobseekers/js-1"), {
-      params: Promise.resolve({ id: "js-1" }),
+      params: Promise.resolve({ jobSeekerId: "js-1" }),
     });
 
     expect(res.status).toBe(401);
@@ -45,7 +45,7 @@ describe("GET /api/jobseekers/[id]", () => {
     findFirstMock.mockResolvedValueOnce(null);
 
     const res = await GET(new Request("http://localhost/api/jobseekers/js-1"), {
-      params: Promise.resolve({ id: "js-1" }),
+      params: Promise.resolve({ jobSeekerId: "js-1" }),
     });
 
     expect(res.status).toBe(404);
@@ -87,7 +87,7 @@ describe("GET /api/jobseekers/[id]", () => {
     } as any);
 
     const res = await GET(new Request("http://localhost/api/jobseekers/js-1"), {
-      params: Promise.resolve({ id: "js-1" }),
+      params: Promise.resolve({ jobSeekerId: "js-1" }),
     });
 
     expect(res.status).toBe(200);
