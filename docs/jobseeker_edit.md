@@ -134,6 +134,5 @@ tailwind/shadcnを使う
 lib/prisma.ts
 lib/auth.ts
 validation設定例：features/auth/loginSchema.test.ts
-proxy.ts
 session取得例:const salesUserId = (session as any)?.user.id as string | undefined;
 Vitest - ReacttestingLibraryを使う

@@ -134,4 +134,3 @@ tailwind/shadcnを使う
 lib/prisma.ts
 lib/auth.ts
 validation設定例：features/auth/loginSchema.test.ts
-proxy.ts
