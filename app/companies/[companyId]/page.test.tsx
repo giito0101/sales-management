@@ -12,6 +12,10 @@ vi.mock("next/headers", () => ({
   headers: vi.fn(),
 }));
 
+vi.mock("@/lib/auth", () => ({
+  authOptions: {},
+}));
+
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 
