@@ -21,6 +21,13 @@ type SeedJobSeeker = {
   desiredLocation: string; // 同上
 };
 
+type SeedCompany = {
+  name: string;
+  industry: string;
+  contact?: string;
+  staff: string;
+};
+
 function buildJobSeekers(
   salesUserId: string,
   suffix: string,
@@ -65,6 +72,70 @@ function buildJobSeekers(
 async function main() {
   const now = Date.now();
 
+  // --- companyを作成 ---
+  const companies: SeedCompany[] = [
+    {
+      name: "桜テック株式会社",
+      industry: "IT・ソフトウェア",
+      contact: "03-1111-2222",
+      staff: "田中 誠",
+    },
+    {
+      name: "グリーン物流サービス",
+      industry: "物流・運輸",
+      contact: "045-222-3333",
+      staff: "山本 玲奈",
+    },
+    {
+      name: "北斗フーズ",
+      industry: "食品・飲料",
+      contact: "011-555-6666",
+      staff: "佐々木 健",
+    },
+    {
+      name: "ミライエ不動産",
+      industry: "不動産",
+      contact: "06-7777-8888",
+      staff: "高橋 亮",
+    },
+    {
+      name: "ライト電機",
+      industry: "製造・電機",
+      contact: "052-123-4567",
+      staff: "伊藤 陽菜",
+    },
+    {
+      name: "サンライズ建設",
+      industry: "建設",
+      contact: "082-234-5678",
+      staff: "小林 恒一",
+    },
+    {
+      name: "ブルースカイ広告",
+      industry: "広告・マーケティング",
+      contact: "092-345-6789",
+      staff: "森本 彩",
+    },
+    {
+      name: "ネクストメディカル",
+      industry: "医療・ヘルスケア",
+      contact: "03-9876-5432",
+      staff: "斎藤 由美",
+    },
+    {
+      name: "フューチャーファーム",
+      industry: "農業・アグリテック",
+      contact: "026-456-7890",
+      staff: "岡田 大輔",
+    },
+    {
+      name: "オーシャンツーリズム",
+      industry: "旅行・観光",
+      contact: "098-567-8901",
+      staff: "松本 美咲",
+    },
+  ];
+
   // --- salesUserを複数定義 ---
   const salesUsers: SeedSalesUser[] = [
     {
@@ -94,6 +165,18 @@ async function main() {
   ];
 
   const salesUserIds = salesUsers.map((u) => u.id);
+
+  // --- companyをリセットして再投入 ---
+  await prisma.company.deleteMany();
+  await prisma.company.createMany({
+    data: companies.map((c) => ({
+      name: c.name,
+      industry: c.industry,
+      contact: c.contact,
+      staff: c.staff,
+    })),
+  });
+  console.log("✅ Companies seeded:", companies.length);
 
   // --- 先に対象営業の配下データを削除（FK回避のため履歴→本体の順） ---
   await prisma.jobSeekerHistory.deleteMany({
