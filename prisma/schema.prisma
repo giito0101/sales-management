@@ -8,10 +8,10 @@ datasource db {
 
 model Company {
   id       String  @id @default(cuid())
-  name     String  @db.VarChar(200)
-  industry String  @db.VarChar(100)
-  contact  String? @db.VarChar(500)
-  memo     String?
+  name     String  @db.VarChar(200) // 企業名（必須 1〜200）
+  industry String  @db.VarChar(100) // 業種（必須 1〜100）
+  contact  String? @db.VarChar(500) // 連絡先（任意 0〜500）
+  staff    String  @db.VarChar(100) // 担当者（必須 1〜100）
 
   @@map("companies")
 }
