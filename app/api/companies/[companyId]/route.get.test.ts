@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
-import { GET } from "./route";
+import { GET } from "./route.get";
 
 const getServerSessionMock = vi.fn();
 vi.mock("next-auth", () => ({
