@@ -37,7 +37,16 @@ export async function GET(
       ? { createdAt: "asc" as const }
       : { createdAt: "desc" as const };
 
-  const rows = await prisma.jobSeekerHistory.findMany({
+  type HistoryRow = {
+    id: string;
+    status: string;
+    memo: string | null;
+    salesUserId: string;
+    salesUserName: string;
+    createdAt: Date;
+  };
+
+  const rows = (await prisma.jobSeekerHistory.findMany({
     where: { jobSeekerId },
     orderBy,
     select: {
@@ -48,7 +57,7 @@ export async function GET(
       salesUserName: true,
       createdAt: true,
     },
-  });
+  })) as HistoryRow[];
 
   return NextResponse.json(
     rows.map((r) => ({
