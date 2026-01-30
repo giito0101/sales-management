@@ -58,7 +58,6 @@ export default function JobSeekerTable(props: {
       const message =
         validation.error.flatten().fieldErrors.q?.[0] ??
         "検索ワードが適切ではありません";
-      console.log(message);
       setLocalError(message);
       return;
     }
