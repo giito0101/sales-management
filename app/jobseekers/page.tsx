@@ -7,7 +7,7 @@ import { jobSeekerSearchParamsSchema } from "@/features/jobseekers/searchSchema"
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { LogoutButton } from "./LogoutButton";
+import { ListSidebar } from "@/components/ListSidebar";
 
 type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -27,9 +27,6 @@ function PageHeader() {
         <Button asChild>
           <Link href="/jobseekers/new">新規作成</Link>
         </Button>
-
-        {/* ⬇ ここ */}
-        <LogoutButton />
       </div>
     </div>
   );
@@ -86,15 +83,20 @@ export default async function JobSeekersPage({ searchParams }: PageProps) {
 
   if (!parsed.success) {
     return (
-      <div className="p-6 space-y-4">
-        <PageHeader />
-        <JobSeekerTable
-          initialQuery={raw.q ?? ""}
-          initialSortKey="updatedAt"
-          initialSortOrder="desc"
-          jobSeekers={[]}
-          errorMessage="検索ワードが適切ではありません"
-        />
+      <div className="flex min-h-screen">
+        <ListSidebar />
+        <main className="flex-1 p-6">
+          <div className="mx-auto w-full max-w-6xl space-y-4">
+            <PageHeader />
+            <JobSeekerTable
+              initialQuery={raw.q ?? ""}
+              initialSortKey="updatedAt"
+              initialSortOrder="desc"
+              jobSeekers={[]}
+              errorMessage="検索ワードが適切ではありません"
+            />
+          </div>
+        </main>
       </div>
     );
   }
@@ -107,15 +109,20 @@ export default async function JobSeekersPage({ searchParams }: PageProps) {
 
   if (!res.ok) {
     return (
-      <div className="p-6 space-y-4">
-        <PageHeader />
-        <JobSeekerTable
-          initialQuery={q}
-          initialSortKey={sortKey}
-          initialSortOrder={sortOrder}
-          jobSeekers={[]}
-          errorMessage="検索ワードが適切ではありません"
-        />
+      <div className="flex min-h-screen">
+        <ListSidebar />
+        <main className="flex-1 p-6">
+          <div className="mx-auto w-full max-w-6xl space-y-4">
+            <PageHeader />
+            <JobSeekerTable
+              initialQuery={q}
+              initialSortKey={sortKey}
+              initialSortOrder={sortOrder}
+              jobSeekers={[]}
+              errorMessage="検索ワードが適切ではありません"
+            />
+          </div>
+        </main>
       </div>
     );
   }
@@ -123,15 +130,20 @@ export default async function JobSeekersPage({ searchParams }: PageProps) {
   const data = (await res.json()) as { jobSeekers: any[] };
 
   return (
-    <div className="p-6 space-y-4">
-      <PageHeader />
-      <JobSeekerTable
-        initialQuery={q}
-        initialSortKey={sortKey}
-        initialSortOrder={sortOrder}
-        jobSeekers={data.jobSeekers}
-        errorMessage={null}
-      />
+    <div className="flex min-h-screen">
+      <ListSidebar />
+      <main className="flex-1 p-6">
+        <div className="mx-auto w-full max-w-6xl space-y-4">
+          <PageHeader />
+          <JobSeekerTable
+            initialQuery={q}
+            initialSortKey={sortKey}
+            initialSortOrder={sortOrder}
+            jobSeekers={data.jobSeekers}
+            errorMessage={null}
+          />
+        </div>
+      </main>
     </div>
   );
 }

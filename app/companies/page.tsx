@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import CompanyTable from "./CompanyTable";
 import { companySearchParamsSchema } from "@/features/companies/searchSchema";
 import { authOptions } from "@/lib/auth";
+import { ListSidebar } from "@/components/ListSidebar";
 
 type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -84,15 +85,20 @@ export default async function CompaniesPage({ searchParams }: PageProps) {
 
   if (!parsed.success) {
     return (
-      <div className="p-6 space-y-4">
-        <PageHeader />
-        <CompanyTable
-          initialQuery={raw.q ?? ""}
-          initialSortKey="id"
-          initialSortOrder="asc"
-          companies={[]}
-          errorMessage="検索ワードが適切ではありません"
-        />
+      <div className="flex min-h-screen">
+        <ListSidebar />
+        <main className="flex-1 p-6">
+          <div className="mx-auto w-full max-w-6xl space-y-4">
+            <PageHeader />
+            <CompanyTable
+              initialQuery={raw.q ?? ""}
+              initialSortKey="id"
+              initialSortOrder="asc"
+              companies={[]}
+              errorMessage="検索ワードが適切ではありません"
+            />
+          </div>
+        </main>
       </div>
     );
   }
@@ -105,15 +111,20 @@ export default async function CompaniesPage({ searchParams }: PageProps) {
 
   if (!res.ok) {
     return (
-      <div className="p-6 space-y-4">
-        <PageHeader />
-        <CompanyTable
-          initialQuery={q}
-          initialSortKey={sortKey}
-          initialSortOrder={sortOrder}
-          companies={[]}
-          errorMessage="検索ワードが適切ではありません"
-        />
+      <div className="flex min-h-screen">
+        <ListSidebar />
+        <main className="flex-1 p-6">
+          <div className="mx-auto w-full max-w-6xl space-y-4">
+            <PageHeader />
+            <CompanyTable
+              initialQuery={q}
+              initialSortKey={sortKey}
+              initialSortOrder={sortOrder}
+              companies={[]}
+              errorMessage="検索ワードが適切ではありません"
+            />
+          </div>
+        </main>
       </div>
     );
   }
@@ -121,15 +132,20 @@ export default async function CompaniesPage({ searchParams }: PageProps) {
   const data = (await res.json()) as { companies: any[] };
 
   return (
-    <div className="p-6 space-y-4">
-      <PageHeader />
-      <CompanyTable
-        initialQuery={q}
-        initialSortKey={sortKey}
-        initialSortOrder={sortOrder}
-        companies={data.companies}
-        errorMessage={null}
-      />
+    <div className="flex min-h-screen">
+      <ListSidebar />
+      <main className="flex-1 p-6">
+        <div className="mx-auto w-full max-w-6xl space-y-4">
+          <PageHeader />
+          <CompanyTable
+            initialQuery={q}
+            initialSortKey={sortKey}
+            initialSortOrder={sortOrder}
+            companies={data.companies}
+            errorMessage={null}
+          />
+        </div>
+      </main>
     </div>
   );
 }

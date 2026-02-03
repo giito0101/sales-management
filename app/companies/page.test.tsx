@@ -25,6 +25,7 @@ vi.mock("next/navigation", () => ({
   redirect: (url: string | URL) => redirectMock(url),
   useRouter: () => ({ push: vi.fn() }),
   useSearchParams: () => new URLSearchParams(),
+  usePathname: () => "/companies",
 }));
 
 describe("CompaniesPage", () => {
