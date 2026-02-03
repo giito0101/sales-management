@@ -1,10 +1,8 @@
 // app/companies/page.tsx
 import { cookies } from "next/headers";
-import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 
-import { Button } from "@/components/ui/button";
 import CompanyTable from "./CompanyTable";
 import { companySearchParamsSchema } from "@/features/companies/searchSchema";
 import { authOptions } from "@/lib/auth";
@@ -24,11 +22,6 @@ function PageHeader() {
         </p>
       </div>
 
-      <div className="flex items-center gap-2">
-        <Button asChild>
-          <Link href="/companies/new">新規作成</Link>
-        </Button>
-      </div>
     </div>
   );
 }
