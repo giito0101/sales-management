@@ -18,14 +18,22 @@ export function ListSidebar() {
   const [isCollapsed, setIsCollapsed] = useState(true);
 
   return (
-    <aside
-      className={cn(
-        "border-r bg-muted/20 p-3 transition-all",
-        isCollapsed ? "w-14" : "w-56"
-      )}
-    >
-      <div className="flex h-full flex-col">
-        <div className={cn("mb-2 flex", isCollapsed ? "justify-center" : "justify-end")}>
+    <>
+      <div className={cn("flex-shrink-0", isCollapsed ? "w-14" : "w-56")} />
+      <aside
+        className={cn(
+          "fixed left-0 top-0 z-20 h-screen border-r bg-muted/20 p-3 transition-all",
+          isCollapsed ? "w-14" : "w-56"
+        )}
+        data-fixed-sidebar
+      >
+        <div className="flex h-full flex-col gap-2">
+        <div
+          className={cn(
+            "flex",
+            isCollapsed ? "justify-center" : "justify-end"
+          )}
+        >
           <button
             type="button"
             onClick={() => setIsCollapsed((prev) => !prev)}
@@ -50,7 +58,7 @@ export function ListSidebar() {
                     variant: isActive ? "secondary" : "ghost",
                     size: "sm",
                   }),
-                  isCollapsed ? "justify-center px-0" : "justify-start"
+                  "justify-center text-center px-0"
                 )}
                 title={item.label}
               >
@@ -59,12 +67,13 @@ export function ListSidebar() {
             );
           })}
         </nav>
-        <div className="mt-auto border-t pt-3">
-          <div className={cn(isCollapsed ? "flex justify-center" : "")}>
-            <LogoutButton compact={isCollapsed} />
+          <div className="mt-auto border-t pt-3">
+            <div className="flex justify-center">
+              <LogoutButton compact={isCollapsed} />
+            </div>
           </div>
-        </div>
       </div>
     </aside>
+    </>
   );
 }

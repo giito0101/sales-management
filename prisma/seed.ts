@@ -137,32 +137,15 @@ async function main() {
   ];
 
   // --- salesUserを複数定義 ---
-  const salesUsers: SeedSalesUser[] = [
-    {
-      id: "sales-001",
-      name: "営業 太郎",
+  const salesUsers: SeedSalesUser[] = Array.from({ length: 11 }, (_, i) => {
+    const index = String(i + 1).padStart(3, "0");
+    return {
+      id: `sales-${index}`,
+      name: `営業 ${index}`,
       passwordPlain: "password123",
-      isActive: true,
-    },
-    {
-      id: "sales-002",
-      name: "営業 花子",
-      passwordPlain: "password123",
-      isActive: true,
-    },
-    {
-      id: "sales-003",
-      name: "営業 次郎",
-      passwordPlain: "password123",
-      isActive: false,
-    },
-    {
-      id: "sales-004",
-      name: "営業 四郎",
-      passwordPlain: "password123",
-      isActive: true,
-    },
-  ];
+      isActive: i !== 10, // 11件目だけ非アクティブ
+    };
+  });
 
   const salesUserIds = salesUsers.map((u) => u.id);
 
