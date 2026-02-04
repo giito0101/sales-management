@@ -78,9 +78,9 @@ export default async function CompaniesPage({ searchParams }: PageProps) {
 
   if (!parsed.success) {
     return (
-      <div className="flex min-h-screen">
+      <div className="flex h-screen overflow-hidden">
         <ListSidebar />
-        <main className="flex-1 p-6">
+        <main className="flex-1 overflow-y-auto p-6">
           <div className="mx-auto w-full max-w-6xl space-y-4">
             <PageHeader />
             <CompanyTable
@@ -104,9 +104,9 @@ export default async function CompaniesPage({ searchParams }: PageProps) {
 
   if (!res.ok) {
     return (
-      <div className="flex min-h-screen">
+      <div className="flex h-screen overflow-hidden">
         <ListSidebar />
-        <main className="flex-1 p-6">
+        <main className="flex-1 overflow-y-auto p-6">
           <div className="mx-auto w-full max-w-6xl space-y-4">
             <PageHeader />
             <CompanyTable
@@ -125,9 +125,9 @@ export default async function CompaniesPage({ searchParams }: PageProps) {
   const data = (await res.json()) as { companies: any[] };
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex h-screen overflow-hidden">
       <ListSidebar />
-      <main className="flex-1 p-6">
+      <main className="flex-1 overflow-y-auto p-6">
         <div className="mx-auto w-full max-w-6xl space-y-4">
           <PageHeader />
           <CompanyTable
