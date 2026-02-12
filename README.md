@@ -1,36 +1,94 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SALES-MANAGEMENT
+
+## Overview
+
+求職者・企業・選考履歴を管理する営業支援Webアプリ。
+
+個人開発として、
+MVPを1サイクルで設計・実装・テストまで完結させることを目的に構築しました。
+
+単に動作させるだけでなく、
+再現性・保守性を意識しながら段階的に機能を追加しています。
+
+---
+
+## Architecture / Design
+
+### 設計方針
+
+- Route HandlerベースのAPI設計（※Server Actionsは未使用）
+- Prismaによるスキーマ駆動設計
+- Zodによる入力バリデーション
+- 機能単位で責務を分離
+
+### 主なドメイン
+
+- SalesUser
+- JobSeeker
+- JobSeekerHistory
+- Company
+
+履歴管理は、営業担当が「求職者の現在状況を把握できること」を目的に設計。
+
+---
+
+## Tech Stack
+
+- Framework: Next.js
+- Language: TypeScript
+- ORM: Prisma
+- DB: PostgreSQL（Neon）
+- Auth: Auth.js（NextAuth）
+- Validation: Zod
+- Styling: Tailwind CSS
+- Testing: Vitest / Testing Library / Playwright
+
+---
+
+## Features
+
+- 認証付きCRUD（求職者・企業管理）
+- 履歴管理（ステータス遷移の記録）
+- フォームバリデーション
+- 一覧・詳細表示
+
+---
+
+## Testing
+
+- 機能単位で必要最低限のテストを追加
+- ユニット／コンポーネントテスト（Vitest）
+- E2Eテスト（Playwright）
+
+Playwrightは、MVP受け入れ確認および証跡保存を目的に導入。
+
+---
+
+## Development Policy
+
+MVPを提供するまでを1サイクルとし、
+
+1. 要件整理
+2. 設計
+3. 実装
+4. テスト
+5. 動作確認
+
+の流れで構築。
+
+---
 
 ## Getting Started
 
-First, run the development server:
-
-```bash
+```sh
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Scripts
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Unit / Component Test
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```sh
+npm run test:run
+```
