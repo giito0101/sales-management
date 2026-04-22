@@ -1,0 +1,11 @@
+id,name,email,passwordHash,image,bio,createdAt,updatedAt
+test1,test1,test1@example.com,$2b$10$Jm1.2BpA6A3IPI7SQDCZAOwvfcUNLOdZuSKssdi9xypmuWTks3uwG,,seed user test1,2025-12-16 11:58:10.353,2025-12-16 11:58:10.353
+test8,test8,test8@example.com,$2b$10$OHFP.4c27RVXR/78.UokRuZ0rA1Su5QejcddgiEw6WZDgYDAVTVSm,,seed user test8,2025-12-16 11:58:10.358,2025-12-16 11:58:10.358
+test4,test4,test4@example.com,$2b$10$jgnUoDcxoPNgb5xaL4J19.FrB01U8t3azwAxSAFoH5cnH2x8AOz.O,,seed user test4,2025-12-16 11:58:10.357,2025-12-16 11:58:10.357
+test7,test7,test7@example.com,$2b$10$mI1fiZr59979U6ftjhaXhOaXvxmrX5O5n.tIXC9qozZ4P059tIcmG,,seed user test7,2025-12-16 11:58:10.358,2025-12-16 11:58:10.358
+test3,test3,test3@example.com,$2b$10$sFqQx.o6wrkpiO3uNA06yec/jwuMMbPbDqrEy7rPdVauUGpQWbiMy,,seed user test3,2025-12-16 11:58:10.356,2025-12-16 11:58:10.356
+test9,test9,test9@example.com,$2b$10$emE8JZEs3uHxkzC.AzD1PO3lGj0H/xVsRzC4jn9/Al1vuubYK7BxK,,seed user test9,2025-12-16 11:58:10.359,2025-12-16 11:58:10.359
+test10,test10,test10@example.com,$2b$10$9Sk2gGd5CSLvmrVQzbkJGuHyHPG/cNK6JmSGUE8U0IjSNpsUi5xcC,,seed user test10,2025-12-16 11:58:10.36,2025-12-16 11:58:10.36
+test6,test6,test6@example.com,$2b$10$GO4DqdjUuq8dIvAKnWD5XOG94FW2YXws92yR.FVEHT4Qz/gXxv5Xe,,seed user test6,2025-12-16 11:58:10.358,2025-12-16 11:58:10.358
+test5,test5,test5@example.com,$2b$10$9AhC3yiKMRKso2HJhskmGem.00c/nrlph0xJ1JVB3GrsJUcyZ3DAi,,seed user test5,2025-12-16 11:58:10.357,2025-12-16 11:58:10.357
+test2,test2,test2@example.com,$2b$10$w/GxpO3wFfcgL/jOkjfDDesbUVZM0UyHVElZivL1jAsCSkM/xxBG6,,seed user test2,2025-12-16 11:58:10.355,2025-12-16 11:58:10.355

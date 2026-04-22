@@ -92,3 +92,10 @@ npm run dev
 ```sh
 npm run test:run
 ```
+
+## Demo Login
+
+以下のテスト用アカウントでログインできます。
+
+- Login ID: `sales-001`
+- Password: `password123`
